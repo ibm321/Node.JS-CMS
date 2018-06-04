@@ -4,16 +4,25 @@ var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 const exphbs = require('express-handlebars')
+const mongoose = require('mongoose')
+const methodOverride = require('method-override')
+
+
+mongoose.connect('mongodb://localhost:27017/cms').then(db =>{
+    console.log('Mongodb connected')
+})
 
 var indexRouter = require('./routes/index');
-var usersRouter = require('./routes/users');
+var usersRouter = require('./routes/admin/admin');
+var postRouter = require('./routes/admin/post');
+var categoryRouter = require('./routes/admin/categories');
 
 var app = express();
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
-app.engine('handlebars', exphbs({defaultLayout: 'layout'}));
-app.set('view engine', 'handlebars');
+app.engine('.hbs', exphbs({defaultLayout: 'layout', extname: '.hbs'}));
+app.set('view engine', '.hbs');
 
 
 app.use(logger('dev'));
@@ -21,9 +30,12 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
+app.use(methodOverride('_method'))
 
 app.use('/', indexRouter);
-app.use('/users', usersRouter);
+app.use('/admin', usersRouter);
+app.use('/admin/posts', postRouter);
+app.use('/admin/category', categoryRouter);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
